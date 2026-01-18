@@ -16,10 +16,10 @@ public class auto_wall_blue_allience extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        fl = hardwareMap.dcMotor.get("fl");
-        fr = hardwareMap.dcMotor.get("fr");
-        bl = hardwareMap.dcMotor.get("bl");
-        br = hardwareMap.dcMotor.get("br");
+        fl = hardwareMap.get(DcMotor.class, "left_front_drive");
+        bl = hardwareMap.get(DcMotor.class, "left_back_drive");
+        fr = hardwareMap.get(DcMotor.class, "right_front_drive");
+        br = hardwareMap.get(DcMotor.class, "right_back_drive");
 
         motorA = hardwareMap.dcMotor.get("motorA");
         motorB = hardwareMap.dcMotor.get("motorB");
