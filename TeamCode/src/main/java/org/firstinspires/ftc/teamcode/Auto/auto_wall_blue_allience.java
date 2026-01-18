@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 public class auto_wall_blue_allience extends LinearOpMode {
 
     DcMotor fl, fr, bl, br;
-    DcMotor motorA, motorB;
 
     static final double TICKS_PER_CM = 17.82;
     static final int TURN_52_TICKS = 306; // אפשר לכייל
@@ -20,9 +19,6 @@ public class auto_wall_blue_allience extends LinearOpMode {
         bl = hardwareMap.get(DcMotor.class, "left_back_drive");
         fr = hardwareMap.get(DcMotor.class, "right_front_drive");
         br = hardwareMap.get(DcMotor.class, "right_back_drive");
-
-        motorA = hardwareMap.dcMotor.get("motorA");
-        motorB = hardwareMap.dcMotor.get("motorB");
 
         fr.setDirection(DcMotor.Direction.REVERSE);
         br.setDirection(DcMotor.Direction.REVERSE);
@@ -40,12 +36,6 @@ public class auto_wall_blue_allience extends LinearOpMode {
         // 3. קדימה 86 ס"מ
         driveStraight(86, 0.4);
 
-        // 4. הפעלת שני מנועים
-        motorA.setPower(1);
-        motorB.setPower(1);
-        sleep(1500);
-        motorA.setPower(0);
-        motorB.setPower(0);
     }
 
     void driveStraight(double cm, double power) {
