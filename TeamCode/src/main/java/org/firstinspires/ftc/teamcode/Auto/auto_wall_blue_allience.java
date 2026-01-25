@@ -4,95 +4,68 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@Autonomous(name = "SimpleAuto_NoIMU WALL ", group = "FTC")
+@Autonomous(name = "Auto_Wall_Blue_Timer_Everybot", group = "FTC")
 public class auto_wall_blue_allience extends LinearOpMode {
 
-    DcMotor fl, fr, bl, br;
-
-    static final double TICKS_PER_CM = 17.82;
-    static final int TURN_52_TICKS = 306; // אפשר לכייל
+    DcMotor leftFrontDrive;
+    DcMotor leftBackDrive;
+    DcMotor rightFrontDrive;
+    DcMotor rightBackDrive;
 
     @Override
     public void runOpMode() {
 
-        fl = hardwareMap.get(DcMotor.class, "left_front_drive");
-        bl = hardwareMap.get(DcMotor.class, "left_back_drive");
-        fr = hardwareMap.get(DcMotor.class, "right_front_drive");
-        br = hardwareMap.get(DcMotor.class, "right_back_drive");
+        leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
+        leftBackDrive   = hardwareMap.get(DcMotor.class, "left_back_drive");
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
+        rightBackDrive  = hardwareMap.get(DcMotor.class, "right_back_drive");
 
-        fr.setDirection(DcMotor.Direction.REVERSE);
-        br.setDirection(DcMotor.Direction.REVERSE);
-
-        resetEncoders();
+        // בדיוק כמו ב-TeleOp
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
         waitForStart();
 
-        // 1. קדימה 255 ס"מ
-        driveStraight(255, 0.5);
+        // 1. קדימה ~255 ס"מ
+        drive(0.7, 0.0, 3100);
 
-        // 2. סיבוב 52 מעלות (בלי IMU)
-        turnInPlace(TURN_52_TICKS, 0.35);
+        // 2. סיבוב ~52 מעלות
+        drive(0.0, 0.60, 450);
 
-        // 3. קדימה 86 ס"מ
-        driveStraight(86, 0.4);
-
-    }
-
-    void driveStraight(double cm, double power) {
-        int ticks = (int) (cm * TICKS_PER_CM);
-
-        setTarget(ticks, ticks, ticks, ticks);
-        runToPosition(power);
-    }
-
-    void turnInPlace(int ticks, double power) {
-        setTarget(ticks, -ticks, ticks, -ticks);
-        runToPosition(power);
-    }
-
-    void setTarget(int flT, int frT, int blT, int brT) {
-        fl.setTargetPosition(fl.getCurrentPosition() + flT);
-        fr.setTargetPosition(fr.getCurrentPosition() + frT);
-        bl.setTargetPosition(bl.getCurrentPosition() + blT);
-        br.setTargetPosition(br.getCurrentPosition() + brT);
-    }
-
-    void runToPosition(double power) {
-        fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        fl.setPower(power);
-        fr.setPower(power);
-        bl.setPower(power);
-        br.setPower(power);
-
-        while (opModeIsActive() &&
-                (fl.isBusy() || fr.isBusy() || bl.isBusy() || br.isBusy())) {
-            idle();
-        }
+        // 3. קדימה ~86 ס"מ
+        drive(0.6, 0.0, 1945);
 
         stopAll();
-        resetEncoders();
     }
 
-    void resetEncoders() {
-        fl.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bl.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        br.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    /**
+     * תנועה לפי המודל של TeleOp
+     * speed = קדימה/אחורה
+     * turn  = סיבוב
+     */
+    void drive(double speed, double turn, long timeMs) {
 
-        fl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        br.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        double lf = speed + turn;
+        double rf = speed - turn;
+        double lb = speed - turn;
+        double rb = speed + turn;
+
+        leftFrontDrive.setPower(lf);
+        rightFrontDrive.setPower(rf);
+        leftBackDrive.setPower(lb);
+        rightBackDrive.setPower(rb);
+
+        sleep(timeMs);
+        stopAll();
     }
 
     void stopAll() {
-        fl.setPower(0);
-        fr.setPower(0);
-        bl.setPower(0);
-        br.setPower(0);
+        leftFrontDrive.setPower(0);
+        rightFrontDrive.setPower(0);
+        leftBackDrive.setPower(0);
+        rightBackDrive.setPower(0);
+        sleep(150);
     }
 }
