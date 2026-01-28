@@ -29,7 +29,7 @@ public class auto_wall_blue_allience extends LinearOpMode {
         waitForStart();
 
         // 1. קדימה ~255 ס"מ
-        drive(0.7, 0.0, 3100);
+        drive(0.7, 0.0, 2864);
 
         // 2. סיבוב ~52 מעלות
         drive(0.0, 0.60, 450);
