@@ -151,10 +151,10 @@ public class full_everybot extends OpMode {
            IN  - left trigger
            OUT - left bumper
         ========================= */
-        if (gamepad2.left_trigger > 0.2) {
+        if (gamepad2.a) {
             intakeMotor.setPower(1.0);
         }
-        else if (gamepad2.left_bumper) {
+        else if (gamepad2.b) {
             intakeMotor.setPower(-1.0);
         }
         else {
