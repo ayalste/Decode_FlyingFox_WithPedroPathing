@@ -4,68 +4,97 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@Autonomous(name = "Auto_Wall_Blue_Timer_Everybot", group = "FTC")
+@Autonomous(name = "auto red wall", group = "FTC")
 public class auto_wall_red_allience extends LinearOpMode {
 
+    // Drive motors
     DcMotor leftFrontDrive;
     DcMotor leftBackDrive;
     DcMotor rightFrontDrive;
     DcMotor rightBackDrive;
 
+    // Catapult motors
+    DcMotor catapult1;
+    DcMotor catapult2;
+
     @Override
     public void runOpMode() {
 
+        // Drive
         leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
         leftBackDrive   = hardwareMap.get(DcMotor.class, "left_back_drive");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         rightBackDrive  = hardwareMap.get(DcMotor.class, "right_back_drive");
 
-        // בדיוק כמו ב-TeleOp
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
+        // Catapult
+        catapult1 = hardwareMap.get(DcMotor.class, "catapult_motor1");
+        catapult2 = hardwareMap.get(DcMotor.class, "catapult_motor2");
+
+        catapult1.setDirection(DcMotor.Direction.REVERSE);
+        catapult2.setDirection(DcMotor.Direction.FORWARD);
+
         waitForStart();
 
-        // 1. קדימה ~255 ס"מ
-        drive(0.7, 0.0, 2864);
+        /* =====================
+           1️⃣ ישר 255 ס״מ
+        ===================== */
+        drive(0.35, 0, 0);
+        sleep(3800);
+        stopDrive();
 
-        // 2. סיבוב ~52 מעלות
-        drive(0.0, -0.60, 450);
+        /* =====================
+           2️⃣ סיבוב שמאלה ~52°
+        ===================== */
+        drive(0, -0.56, 0);   // turn שמאלה
+        sleep(1657);         // תכווני אם צריך
+        stopDrive();
 
-        // 3. קדימה ~86 ס"מ
-        drive(0.6, 0.0, 1945);
+        /* =====================
+           3️⃣ ישר 86 ס״מ
+        ===================== */
+        drive(0.35, 0, 0);
+        sleep(3200);
+        stopDrive();
 
-        stopAll();
+        /* =====================
+           4️⃣ יריית קטפולטה
+        ===================== */
+        fireCatapult();
+
+        stopDrive();
     }
 
-    /**
-     * תנועה לפי המודל של TeleOp
-     * speed = קדימה/אחורה
-     * turn  = סיבוב
-     */
-    void drive(double speed, double turn, long timeMs) {
-
-        double lf = speed + turn;
-        double rf = speed - turn;
-        double lb = speed - turn;
-        double rb = speed + turn;
-
-        leftFrontDrive.setPower(lf);
-        rightFrontDrive.setPower(rf);
-        leftBackDrive.setPower(lb);
-        rightBackDrive.setPower(rb);
-
-        sleep(timeMs);
-        stopAll();
+    /* =====================
+       DRIVE – אותו חישוב כמו TeleOp
+    ===================== */
+    void drive(double speed, double turn, double rotation) {
+        leftFrontDrive.setPower(speed + turn + rotation);
+        rightFrontDrive.setPower(speed - turn - rotation);
+        leftBackDrive.setPower(speed - turn + rotation);
+        rightBackDrive.setPower(speed + turn - rotation);
     }
 
-    void stopAll() {
+    void stopDrive() {
         leftFrontDrive.setPower(0);
         rightFrontDrive.setPower(0);
         leftBackDrive.setPower(0);
         rightBackDrive.setPower(0);
-        sleep(150);
+        sleep(100);
+    }
+
+    /* =====================
+       CATAPULT – כמו TeleOp
+    ===================== */
+    void fireCatapult() {
+        catapult1.setPower(-1.0);
+        catapult2.setPower(-1.0);
+        sleep(700);          // זמן ירי
+        catapult1.setPower(0);
+        catapult2.setPower(0);
     }
 }
