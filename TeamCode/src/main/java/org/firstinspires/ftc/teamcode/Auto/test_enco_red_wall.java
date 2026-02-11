@@ -9,156 +9,120 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-@Autonomous(name = "TEST_ENCODER_IMU_FIXED", group = "TEST")
+@Autonomous(name = "Forward1m_Turn53", group = "Test")
 public class test_enco_red_wall extends LinearOpMode {
 
-    DcMotor lf, lb, rf, rb;
     IMU imu;
 
-    static final double TICKS_PER_REV = 537.7;
-    static final double WHEEL_DIAMETER_CM = 9.6;
-    static final double TICKS_PER_CM =
-            TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER_CM);
+    DcMotor leftFront, leftBack, rightFront, rightBack;
 
-    static final double DRIVE_POWER = 0.4;
-    static final double TURN_KP = 0.01;
+    // התאמה לגלגל 96mm
+    static final double COUNTS_PER_REV = 537.6; // goBilda 312rpm
+    static final double WHEEL_DIAMETER_CM = 9.6;
+    static final double COUNTS_PER_CM =
+            COUNTS_PER_REV / (Math.PI * WHEEL_DIAMETER_CM);
 
     @Override
     public void runOpMode() {
 
-        lf = hardwareMap.get(DcMotor.class, "left_front_drive");
-        lb = hardwareMap.get(DcMotor.class, "left_back_drive");
-        rf = hardwareMap.get(DcMotor.class, "right_front_drive");
-        rb = hardwareMap.get(DcMotor.class, "right_back_drive");
-
-        lf.setDirection(DcMotor.Direction.REVERSE);
-        lb.setDirection(DcMotor.Direction.REVERSE);
-        rf.setDirection(DcMotor.Direction.FORWARD);
-        rb.setDirection(DcMotor.Direction.FORWARD);
+        leftFront = hardwareMap.get(DcMotor.class, "leftFront");
+        leftBack = hardwareMap.get(DcMotor.class, "leftBack");
+        rightFront = hardwareMap.get(DcMotor.class, "rightFront");
+        rightBack = hardwareMap.get(DcMotor.class, "rightBack");
 
         imu = hardwareMap.get(IMU.class, "imu");
 
         RevHubOrientationOnRobot orientation =
                 new RevHubOrientationOnRobot(
                         RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
-                );
+                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
 
         imu.initialize(new IMU.Parameters(orientation));
 
-        resetEncoders();
-        setRunUsingEncoder();
+        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        telemetry.addLine("READY – encoders + IMU test");
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        telemetry.addLine("Ready");
         telemetry.update();
 
         waitForStart();
 
-        /* =====================
-           1️⃣ DRIVE 1 METER
-        ===================== */
-        driveStraightCM(100);
-
-        sleep(500);
-
-        /* =====================
-           2️⃣ TURN LEFT 45°
-        ===================== */
-//        turnLeft45();
         imu.resetYaw();
 
-        while (opModeIsActive()){
-            setDrivePower(-0.2, 0.2);
-            double yaw = getHeading();
-            telemetry.addData("Yaw", yaw);
-            telemetry.update();
-        }
+// 🚗 נוסע ישר 100 ס"מ
+        driveForwardCM(100, 0.4);
 
+        sleep(300);
 
+// 🔄 סיבוב שמאלה 53 מעלות
+        turnLeftToAngle(-53);
 
-//        stopDrive();
+        stopMotors();
     }
 
-    /* =====================
-       DRIVE STRAIGHT – ENCODER ONLY
-    ===================== */
-    void driveStraightCM(double cm) {
+    // ===== נסיעה ישר =====
+    void driveForwardCM(double cm, double power) {
 
-        int targetTicks = (int)(cm * TICKS_PER_CM);
-        int startTicks = lf.getCurrentPosition();
+        int move = (int)(cm * COUNTS_PER_CM);
 
-        while (opModeIsActive() &&
-                Math.abs(lf.getCurrentPosition() - startTicks) < targetTicks) {
+        leftFront.setTargetPosition(move);
+        leftBack.setTargetPosition(move);
+        rightFront.setTargetPosition(move);
+        rightBack.setTargetPosition(move);
 
-            setDrivePower(DRIVE_POWER, DRIVE_POWER);
+        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            telemetry.addData("LF", lf.getCurrentPosition());
-            telemetry.addData("RF", rf.getCurrentPosition());
-            telemetry.update();
+        setPower(power);
+
+        while(opModeIsActive() && leftFront.isBusy()) {
+            idle();
         }
 
-        stopDrive();
+        stopMotors();
+
+        setRunUsingEncoder();
     }
 
-    /* =====================
-       TURN LEFT 45° – IMU RELATIVE
-    ===================== */
-    void turnLeft45() {
+    // ===== סיבוב לפי IMU =====
+    void turnLeftToAngle(double target) {
 
-        imu.resetYaw(); // ⭐ קריטי
-        double target = 45;
+        while(opModeIsActive() &&
+                imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) > target) {
 
-        while (opModeIsActive()) {
-
-            double yaw = getHeading();
-            double error = target - yaw;
-
-            if (Math.abs(error) < 1.0) break;
-
-            double power = error * TURN_KP;
-            power = Math.max(0.15, Math.min(0.4, power));
-
-            setDrivePower(-power, power);
-
-            telemetry.addData("Yaw", yaw);
-            telemetry.addData("Error", error);
-            telemetry.update();
+            leftFront.setPower(-0.3);
+            leftBack.setPower(-0.3);
+            rightFront.setPower(0.3);
+            rightBack.setPower(0.3);
         }
 
-        stopDrive();
+        stopMotors();
     }
 
-    /* =====================
-       HELPERS
-    ===================== */
-    void resetEncoders() {
-        lf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    void setPower(double p) {
+        leftFront.setPower(p);
+        leftBack.setPower(p);
+        rightFront.setPower(p);
+        rightBack.setPower(p);
+    }
+
+    void stopMotors() {
+        setPower(0);
     }
 
     void setRunUsingEncoder() {
-        lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-
-    void setDrivePower(double left, double right) {
-        lf.setPower(left);
-        lb.setPower(left);
-        rf.setPower(right);
-        rb.setPower(right);
-    }
-
-    void stopDrive() {
-        setDrivePower(0, 0);
-        sleep(200);
-    }
-
-    double getHeading() {
-        YawPitchRollAngles a = imu.getRobotYawPitchRollAngles();
-        return a.getYaw(AngleUnit.DEGREES);
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 }
