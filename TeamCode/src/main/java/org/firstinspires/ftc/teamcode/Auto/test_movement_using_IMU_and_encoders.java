@@ -228,10 +228,10 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
         double startYaw = getYaw();
         double targetYaw = startYaw - targetAngle;
         double currentYaw = getYaw();
-        double yawDiff = Math.abs(targetYaw) - getYaw();
+        double yawDiff = targetYaw - getYaw();
         double speedMulti = yawDiff / Math.abs(targetAngle);
 
-        while(yawDiff > 0) {
+        while(yawDiff < 0) {
             currentYaw = getYaw();
             yawDiff = Math.abs(targetYaw) - getYaw();
             speedMulti = yawDiff / Math.abs(targetAngle);
