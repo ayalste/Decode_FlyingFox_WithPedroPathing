@@ -72,11 +72,12 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
 
         catapult1.setPower(0.2);
         catapult2.setPower(0.2);
-        driveCM(250);
 
-        turn(43, 0.3);
+        driveCM(260, 0.8);
 
-        driveCM(75);
+        turnLeft(43, 0.3);
+
+        driveCM(75, 0.4);
 
         sleep(200);
 
@@ -84,15 +85,15 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
         catapult1.setPower(0.2);
         catapult2.setPower(0.2);
 
-        driveCM(-170);
-//
-//        turn(43, -0.3);
-//
-//        intakeMotor.setPower(1.0);
-//
-//        driveCM(60);
-//
-//        intakeMotor.setPower(0);
+        driveCM(-170, 0.5);
+
+        turnRight(43, 0.3);
+
+        intakeMotor.setPower(1.0);
+
+        driveCM(60, 0.7);
+
+        intakeMotor.setPower(0);
 
 
         stopMotors();
@@ -102,7 +103,7 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
     // DRIVE USING ENCODERS
 
 
-    void driveCM(double cm) {
+    void driveCM(double cm, double drivingSpeed) {
 
         int ticks = (int)(cm * TICKS_PER_CM);
 
@@ -115,7 +116,7 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
         setRunToPosition();
 
 
-        driveRobot(DRIVE_POWER,0,0);
+        driveRobot(drivingSpeed,0,0);
 
 
         while(opModeIsActive() &&
@@ -189,20 +190,62 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
     }
 
 
-    void turn(double targetAngle, double turningSpeed){
+    void turnLeft(double targetAngle, double turningSpeed){
         setRunWithoutEncoder();
 //        imu.resetYaw();
         double startYaw = getYaw();
+        double targetYaw = startYaw + targetAngle;
+        double currentYaw = getYaw();
+        double yawDiff = targetYaw - currentYaw;
+        double speedMulti = yawDiff / targetAngle;
 
-        while(getYaw() < startYaw + targetAngle) {
-            leftFrontDrive.setPower(-turningSpeed);
-            rightFrontDrive.setPower(turningSpeed);
-            leftBackDrive.setPower(-turningSpeed);
-            rightBackDrive.setPower(turningSpeed);
+        while(yawDiff > 0) {
+            currentYaw = getYaw();
+            yawDiff = startYaw + targetAngle - getYaw();
+            speedMulti = yawDiff / targetAngle;
+
+            leftFrontDrive.setPower(-turningSpeed*speedMulti -0.07);
+            rightFrontDrive.setPower(turningSpeed*speedMulti+ 0.07);
+            leftBackDrive.setPower(-turningSpeed*speedMulti -0.07);
+            rightBackDrive.setPower(turningSpeed*speedMulti+ 0.07);
+
             telemetry.addData("Starting Yaw", startYaw);
-            telemetry.addData("Target Yaw", startYaw + targetAngle);
-            telemetry.addData("Current Yaw", getYaw());
-            telemetry.addData("Yaw Diff", startYaw + targetAngle - getYaw());
+            telemetry.addData("Target Yaw", targetYaw);
+            telemetry.addData("Current Yaw", currentYaw);
+            telemetry.addData("Yaw Diff", yawDiff);
+            telemetry.addData("Yaw Diff", speedMulti);
+            telemetry.update();
+        }
+
+        stopMotors();
+        sleep(100);
+
+    }
+
+    void turnRight(double targetAngle, double turningSpeed){
+        setRunWithoutEncoder();
+//        imu.resetYaw();
+        double startYaw = getYaw();
+        double targetYaw = startYaw - targetAngle;
+        double currentYaw = getYaw();
+        double yawDiff = Math.abs(targetYaw) - getYaw();
+        double speedMulti = yawDiff / Math.abs(targetAngle);
+
+        while(yawDiff > 0) {
+            currentYaw = getYaw();
+            yawDiff = Math.abs(targetYaw) - getYaw();
+            speedMulti = yawDiff / Math.abs(targetAngle);
+
+            leftFrontDrive.setPower(turningSpeed*speedMulti+ 0.07);
+            rightFrontDrive.setPower(-turningSpeed*speedMulti- 0.07);
+            leftBackDrive.setPower(turningSpeed*speedMulti+ 0.07);
+            rightBackDrive.setPower(-turningSpeed*speedMulti- 0.07);
+
+            telemetry.addData("Starting Yaw", startYaw);
+            telemetry.addData("Target Yaw", targetYaw);
+            telemetry.addData("Current Yaw", currentYaw);
+            telemetry.addData("Yaw Diff", yawDiff);
+            telemetry.addData("Yaw Diff", speedMulti);
             telemetry.update();
         }
 
