@@ -15,11 +15,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 @Autonomous(name = "Auto Everybot IMU", group = "Auto")
 public class test_movement_using_IMU_and_encoders extends LinearOpMode {
 
-    private DcMotor leftFrontDrive;
-    private DcMotor leftBackDrive;
-    private DcMotor rightFrontDrive;
-    private DcMotor rightBackDrive;
-
+    DcMotor leftFrontDrive, leftBackDrive, rightFrontDrive, rightBackDrive;
+    DcMotor catapult1, catapult2;
     IMU imu;
 
     static final double TICKS_PER_REV = 537.7;
@@ -29,12 +26,13 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
             TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER_CM);
 
     static final double DRIVE_POWER = 0.4;
-    static final double TURN_KP = 0.008;
+    static final double TURN_KP = 0.01;
 
 
     @Override
     public void runOpMode() {
 
+        // Wheels Motors
         leftFrontDrive = hardwareMap.get(DcMotor.class, "left_front_drive");
         leftBackDrive = hardwareMap.get(DcMotor.class, "left_back_drive");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
@@ -45,6 +43,12 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
+        // Catapult Motors
+        catapult1 = hardwareMap.get(DcMotor.class, "catapult_motor1");
+        catapult2 = hardwareMap.get(DcMotor.class, "catapult_motor2");
+
+        catapult1.setDirection(DcMotor.Direction.REVERSE);
+        catapult2.setDirection(DcMotor.Direction.FORWARD);
 
         imu = hardwareMap.get(IMU.class, "imu");
 
@@ -57,19 +61,18 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
         imu.initialize(new IMU.Parameters(orientation));
 
         resetEncoders();
-
         waitForStart();
-
         imu.resetYaw();
+        sleep(100);
 
 
         driveCM(250);
 
-        turnToAngle(50);
+        turnLeft(43, 0.3);
 
-//        driveCM(-100);
-//
-//        turnToAngle(-70);
+        driveCM(92);
+
+        shootCatapult();
 
 
         stopMotors();
@@ -106,46 +109,44 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
 
         setRunUsingEncoder();
 
-        sleep(200);
+        sleep(100);
     }
 
 
 
-    // TURN USING SAME LOGIC AS TELEOP
-
-
-    void turnToAngle(double targetAngle) {
-
-        setRunWithoutEncoder();
-
-        while(opModeIsActive()) {
-
-            double yaw = getYaw();
-
-            double error = yaw - targetAngle;
-
-
-            // Normalize error to -180 to +180
-            error = (error + 180) % 360 - 180;
-
-            if(Math.abs(error) < 2) break;   // דיוק יותר טוב
-
-            double turn = error * TURN_KP;
-
-            turn = Math.max(-0.4, Math.min(0.4, turn));
-
-            driveRobot(0, 0, turn);
-
-            telemetry.addData("Target", targetAngle);
-            telemetry.addData("Yaw", yaw);
-            telemetry.addData("Error", error);
-            telemetry.update();
-        }
-
-        stopMotors();
-        sleep(200);
-    }
-
+//    // TURN USING SAME LOGIC AS TELEOP
+//
+//
+//    void turnToAngle(double targetAngle) {
+//
+//        setRunWithoutEncoder();
+//
+//        while(opModeIsActive()) {
+//
+//            double yaw = getYaw();
+//
+//            double error = targetAngle - yaw;
+//
+//            if(Math.abs(error) < 10) break;
+//
+//
+//            double turn = error * TURN_KP;
+//
+//            turn = Math.max(-0.4, Math.min(0.4, turn));
+//
+//
+//            driveRobot(0, 0, turn);
+//
+//
+//            telemetry.addData("Yaw", yaw);
+//            telemetry.update();
+//
+//        }
+//
+//        stopMotors();
+//
+//        sleep(100);
+//    }
 
 
 
@@ -177,6 +178,31 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
 
     }
 
+    void turnLeft(double targetAngle, double turningSpeed){
+        setRunWithoutEncoder();
+//        imu.resetYaw();
+        double startYaw = getYaw();
+
+        while(getYaw() < startYaw + targetAngle) {
+            leftFrontDrive.setPower(-turningSpeed);
+            rightFrontDrive.setPower(turningSpeed);
+            leftBackDrive.setPower(-turningSpeed);
+            rightBackDrive.setPower(turningSpeed);
+            telementaryYawUpdate(startYaw,targetAngle);
+        }
+
+        stopMotors();
+        telementaryYawUpdate(startYaw,targetAngle);
+        sleep(100);
+
+    }
+
+    void shootCatapult(){
+        catapult1.setPower(-1.0);
+        catapult2.setPower(-1.0);
+        sleep(1000);
+    }
+
 
 
     double getYaw() {
@@ -187,11 +213,21 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
         return angles.getYaw(AngleUnit.DEGREES);
     }
 
+    void telementaryYawUpdate(double startYaw, double targetAngle){
+        telemetry.addData("Starting Yaw", startYaw);
+        telemetry.addData("Target Yaw", startYaw + targetAngle);
+        telemetry.addData("Current Yaw", getYaw());
+        telemetry.addData("Yaw Diff", startYaw + targetAngle - getYaw());
+        telemetry.update();
+    }
+
 
 
     void stopMotors(){
-
-        driveRobot(0,0,0);
+        leftFrontDrive.setPower(0);
+        rightFrontDrive.setPower(0);
+        leftBackDrive.setPower(0);
+        rightBackDrive.setPower(0);
 
     }
 
