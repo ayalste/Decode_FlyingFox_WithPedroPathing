@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @TeleOp(name = "full_everybot", group = "Teleop")
 public class full_everybot extends OpMode {
@@ -36,6 +37,10 @@ public class full_everybot extends OpMode {
     private final double FOOT_UP_POWER = 1.0;
     private final double FOOT_DOWN_POWER = -1.0;
     private final double FOOT_OFF_POWER = 0.0;
+    private boolean shaking = false;
+    private int shakeStep = 0;
+    private ElapsedTime shakeTimer = new ElapsedTime();
+
 
     @Override
     public void init() {
@@ -123,8 +128,10 @@ public class full_everybot extends OpMode {
            UP   - right trigger
            DOWN - right bumper
         ========================= */
+        // CATAPULT
         boolean catapultUp = gamepad2.right_trigger > 0.2;
         boolean catapultDown = gamepad2.right_bumper;
+        boolean shake = gamepad2.dpad_right;
 
         if (catapultUp && catapultDown) {
             catapultUp = false;
@@ -134,17 +141,52 @@ public class full_everybot extends OpMode {
             pivotMode = CatapultModes.UP;
             catapult1.setPower(-1.0);
             catapult2.setPower(-1.0);
+            shaking = false;
         }
         else if (catapultDown) {
             pivotMode = CatapultModes.DOWN;
             catapult1.setPower(1.0);
             catapult2.setPower(1.0);
+            shaking = false;
         }
-        else {
+        else if (shake && !shaking) {
+            shaking = true;
+            shakeStep = 0;
+            shakeTimer.reset();
+        }
+        else if (!shaking) {
             pivotMode = CatapultModes.HOLD;
             catapult1.setPower(0.2);
             catapult2.setPower(0.2);
         }
+
+
+        if (shaking) {
+
+            if (shakeTimer.milliseconds() > 80) {
+
+                shakeTimer.reset();
+                shakeStep++;
+
+                if (shakeStep % 2 == 0) {
+                    catapult1.setPower(-0.3173);
+                    catapult2.setPower(-0.3173);
+                } else {
+                    catapult1.setPower(0.3173);
+                    catapult2.setPower(0.3173);
+
+                }
+
+                if (shakeStep >= 6) {
+                    shaking = false;
+                    catapult1.setPower(0);
+                    catapult2.setPower(0);
+                    pivotMode = CatapultModes.DOWN;
+                }
+            }
+        }
+
+
 
         /* =========================
            INTAKE (gamepad2)
