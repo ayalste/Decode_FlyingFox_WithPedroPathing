@@ -28,7 +28,7 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
             TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER_CM);
 
     static final double DRIVE_POWER = 0.4;
-    static final double TURN_KP = 0.01;
+    static final double TURN_KP = 0.008;
 
 
     @Override
@@ -121,28 +121,30 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
 
             double yaw = getYaw();
 
-            double error = targetAngle - yaw;
+            double error = yaw - targetAngle;
 
-            if(Math.abs(error) < 10) break;
 
+            // Normalize error to -180 to +180
+            error = (error + 180) % 360 - 180;
+
+            if(Math.abs(error) < 2) break;   // דיוק יותר טוב
 
             double turn = error * TURN_KP;
 
             turn = Math.max(-0.4, Math.min(0.4, turn));
 
-
             driveRobot(0, 0, turn);
 
-
+            telemetry.addData("Target", targetAngle);
             telemetry.addData("Yaw", yaw);
+            telemetry.addData("Error", error);
             telemetry.update();
-
         }
 
         stopMotors();
-
         sleep(200);
     }
+
 
 
 
