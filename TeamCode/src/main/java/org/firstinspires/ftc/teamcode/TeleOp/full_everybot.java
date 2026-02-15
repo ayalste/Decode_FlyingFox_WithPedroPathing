@@ -4,10 +4,12 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 @TeleOp(name = "full_everybot", group = "Teleop")
 public class full_everybot extends OpMode {
+
+    private VoltageSensor batteryVoltageSensor;
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -37,10 +39,10 @@ public class full_everybot extends OpMode {
     private final double FOOT_UP_POWER = 1.0;
     private final double FOOT_DOWN_POWER = -1.0;
     private final double FOOT_OFF_POWER = 0.0;
+
     private boolean shaking = false;
     private int shakeStep = 0;
     private ElapsedTime shakeTimer = new ElapsedTime();
-
 
     @Override
     public void init() {
@@ -75,6 +77,9 @@ public class full_everybot extends OpMode {
         catapult2.setDirection(DcMotor.Direction.FORWARD);
 
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+
+        // Battery sensor
+        batteryVoltageSensor = hardwareMap.voltageSensor.iterator().next();
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -160,7 +165,6 @@ public class full_everybot extends OpMode {
             catapult2.setPower(0.2);
         }
 
-
         if (shaking) {
 
             if (shakeTimer.milliseconds() > 80) {
@@ -169,12 +173,11 @@ public class full_everybot extends OpMode {
                 shakeStep++;
 
                 if (shakeStep % 2 == 0) {
-                    catapult1.setPower(-0.3173);
-                    catapult2.setPower(-0.3173);
+                    catapult1.setPower(-0.2);
+                    catapult2.setPower(-0.2);
                 } else {
-                    catapult1.setPower(0.3173);
-                    catapult2.setPower(0.3173);
-
+                    catapult1.setPower(0.2);
+                    catapult2.setPower(0.2);
                 }
 
                 if (shakeStep >= 6) {
@@ -185,8 +188,6 @@ public class full_everybot extends OpMode {
                 }
             }
         }
-
-
 
         /* =========================
            INTAKE (gamepad2)
@@ -210,7 +211,25 @@ public class full_everybot extends OpMode {
         telemetry.addData("Catapult mode", pivotMode);
         telemetry.addData("Intake power", intakeMotor.getPower());
         telemetry.addData("Foot mode", footMode);
+
+        telemetry.addData("Battery Voltage", batteryVoltageSensor.getVoltage());
+        telemetry.addData("Battery %", "%.1f", getBatteryPercent());
+
         telemetry.update();
+    }
+
+    double getBatteryPercent() {
+
+        double voltage = batteryVoltageSensor.getVoltage();
+
+        double minVoltage = 9.6;
+        double maxVoltage = 12.6;
+
+        double percent = (voltage - minVoltage) / (maxVoltage - minVoltage) * 100.0;
+
+        percent = Math.max(0, Math.min(100, percent));
+
+        return percent;
     }
 
     @Override
