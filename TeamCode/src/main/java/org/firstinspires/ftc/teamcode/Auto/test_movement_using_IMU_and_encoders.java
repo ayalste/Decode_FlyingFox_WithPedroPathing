@@ -116,7 +116,7 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
         setRunToPosition();
 
 
-        driveRobot(drivingSpeed,0,0);
+        driveRobot(drivingSpeed);
 
 
         while(opModeIsActive() &&
@@ -135,54 +135,19 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
 
 
 
-//    // TURN USING SAME LOGIC AS TELEOP
-//
-//
-//    void turnToAngle(double targetAngle) {
-//
-//        setRunWithoutEncoder();
-//
-//        while(opModeIsActive()) {
-//
-//            double yaw = getYaw();
-//
-//            double error = targetAngle - yaw;
-//
-//            if(Math.abs(error) < 10) break;
-//
-//
-//            double turn = error * TURN_KP;
-//
-//            turn = Math.max(-0.4, Math.min(0.4, turn));
-//
-//
-//            driveRobot(0, 0, turn);
-//
-//
-//            telemetry.addData("Yaw", yaw);
-//            telemetry.update();
-//
-//        }
-//
-//        stopMotors();
-//
-//        sleep(100);
-//    }
 
 
 
-    // SAME DRIVE FUNCTION AS TELEOP
 
+    void driveRobot(double speed) {
 
-    void driveRobot(double speed, double turn, double rotation) {
+        leftFrontDrive.setPower(speed);
 
-        leftFrontDrive.setPower(speed + turn + rotation);
+        rightFrontDrive.setPower(speed);
 
-        rightFrontDrive.setPower(speed - turn - rotation);
+        leftBackDrive.setPower(speed);
 
-        leftBackDrive.setPower(speed - turn + rotation);
-
-        rightBackDrive.setPower(speed + turn - rotation);
+        rightBackDrive.setPower(speed);
 
         YawPitchRollAngles angles =
                 imu.getRobotYawPitchRollAngles();
