@@ -4,8 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@Autonomous(name = "Encoder Test Auto", group = "Auto")
-public class test_turning_encoders extends LinearOpMode {
+@Autonomous(name = "Encoders Basket Blue", group = "Auto")
+public class encoders_basket_blue_alliance extends LinearOpMode {
 
     DcMotor lf, lb, rf, rb;
     DcMotor catapult1, catapult2;
@@ -46,15 +46,10 @@ public class test_turning_encoders extends LinearOpMode {
 
         waitForStart();
 
+        sleep(200);
+
         catapult1.setPower(0.2);
         catapult2.setPower(0.2);
-
-
-        driveForward(220, 0.7);
-
-        turn(-47, 0.4);
-
-        driveForward(112, 0.7);
 
         shootCatapult();
 
