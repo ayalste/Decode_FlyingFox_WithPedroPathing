@@ -108,20 +108,45 @@ public class full_everybot extends OpMode {
         /* =========================
            FOOT (gamepad1)
         ========================= */
+//
+//        boolean footDownButton = gamepad1.a;
+//        boolean footUpButton = gamepad1.b;
+//
+//        if (footDownButton && footUpButton) {
+//            footDownButton = false;
+//        }
+//
+//        if (footDownButton) {
+//            footMode = FootModes.DOWN;
+//            foot.setPower(FOOT_DOWN_POWER);
+//        }
+//        else if (footUpButton) {
+//            footMode = FootModes.UP;
+//            foot.setPower(FOOT_UP_POWER);
+//        }
+//        else {
+//            footMode = FootModes.BRAKE;
+//            foot.setPower(FOOT_OFF_POWER);
+//        }
+
+        int MAX_SUM_VALUE = 5;
         boolean footDownButton = gamepad1.a;
         boolean footUpButton = gamepad1.b;
+        int upDownSum = 0;
 
         if (footDownButton && footUpButton) {
             footDownButton = false;
         }
 
-        if (footDownButton) {
+        if (footDownButton && upDownSum < MAX_SUM_VALUE) {
             footMode = FootModes.DOWN;
             foot.setPower(FOOT_DOWN_POWER);
+            upDownSum++;
         }
-        else if (footUpButton) {
+        else if (footUpButton && upDownSum > 0) {
             footMode = FootModes.UP;
             foot.setPower(FOOT_UP_POWER);
+            upDownSum--;
         }
         else {
             footMode = FootModes.BRAKE;
