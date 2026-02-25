@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-@TeleOp(name = "full_TOTO:)", group = "Teleop")
+@TeleOp(name = "\\o/ TOTO_Full :)", group = "Teleop")
 public class full_everybot extends OpMode {
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Declarations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,7 +53,7 @@ public class full_everybot extends OpMode {
     private DcMotor foot;
 
     // Encoder
-    static final int MOVE_TICKS = 2300;   // כמה שצריך להסתובב
+    static final int MOVE_TICKS = 2315;   // כמה שצריך להסתובב
     static final double MOVE_POWER = 1;
     boolean lastA = false;
     boolean lastB = false;
@@ -63,7 +63,7 @@ public class full_everybot extends OpMode {
     boolean homing = true;
     int lastEncoderPosition = 0;
     ElapsedTime stallTimer = new ElapsedTime();
-    static final double HOMING_POWER = 0.15;
+    static final double HOMING_POWER = 0.2;
     static final int MOVEMENT_THRESHOLD = 5;
     static final int STALL_TIME_MS = 300;
 
