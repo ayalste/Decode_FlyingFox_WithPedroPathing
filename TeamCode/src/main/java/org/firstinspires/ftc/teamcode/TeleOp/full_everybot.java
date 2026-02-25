@@ -29,16 +29,18 @@ public class full_everybot extends OpMode {
     // Foot motor
     private DcMotor foot;
 
+    // encoder foot
+    static final int MOVE_TICKS = 2300;   // כמה שצריך להסתובב
+    static final double MOVE_POWER = 1;
+    boolean lastA = false;
+    boolean lastB = false;
+    boolean isActive = false;
+
     private enum CatapultModes { UP, DOWN, HOLD }
     private CatapultModes pivotMode;
 
     private enum FootModes { UP, DOWN, BRAKE }
     private FootModes footMode;
-
-    // Foot power values
-    private final double FOOT_UP_POWER = 1.0;
-    private final double FOOT_DOWN_POWER = -1.0;
-    private final double FOOT_OFF_POWER = 0.0;
 
     private boolean shaking = false;
     private int shakeStep = 0;
@@ -65,6 +67,13 @@ public class full_everybot extends OpMode {
         foot = hardwareMap.get(DcMotor.class, "foot");
         foot.setDirection(DcMotor.Direction.REVERSE);
         foot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //encoder
+        foot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        foot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        foot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        foot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Drive directions
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -88,6 +97,13 @@ public class full_everybot extends OpMode {
     @Override
     public void start() {
         runtime.reset();
+
+
+        //setting the endgame
+        int newTarget = foot.getCurrentPosition() + MOVE_TICKS;
+        foot.setTargetPosition(newTarget);
+        foot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        foot.setPower(0.1);
     }
 
     @Override
@@ -129,29 +145,39 @@ public class full_everybot extends OpMode {
 //            foot.setPower(FOOT_OFF_POWER);
 //        }
 
-        int MAX_SUM_VALUE = 5;
-        boolean footDownButton = gamepad1.a;
-        boolean footUpButton = gamepad1.b;
-        int upDownSum = 0;
+        boolean currentA = gamepad1.a;
+        boolean currentB = gamepad1.b;
+        boolean aPressed = currentA && !lastA;
+        boolean bPressed = currentB && !lastB;
 
-        if (footDownButton && footUpButton) {
-            footDownButton = false;
+        if (aPressed && !foot.isBusy() && !isActive) {
+
+            int newTarget = foot.getCurrentPosition() - MOVE_TICKS;
+
+            foot.setTargetPosition(newTarget);
+            foot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            foot.setPower(MOVE_POWER);
+
+            isActive = !isActive;
         }
 
-        if (footDownButton && upDownSum < MAX_SUM_VALUE) {
-            footMode = FootModes.DOWN;
-            foot.setPower(FOOT_DOWN_POWER);
-            upDownSum++;
+        if (bPressed && !foot.isBusy() && isActive) {
+
+            int newTarget = foot.getCurrentPosition() + MOVE_TICKS;
+
+            foot.setTargetPosition(newTarget);
+            foot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            foot.setPower(MOVE_POWER);
+
+            isActive = !isActive;
         }
-        else if (footUpButton && upDownSum > 0) {
-            footMode = FootModes.UP;
-            foot.setPower(FOOT_UP_POWER);
-            upDownSum--;
-        }
-        else {
-            footMode = FootModes.BRAKE;
-            foot.setPower(FOOT_OFF_POWER);
-        }
+
+        telemetry.addData("Position", foot.getCurrentPosition());
+        telemetry.update();
+
+        lastA = currentA;
+        lastB = currentB;
+
 
         /* =========================
            CATAPULT (gamepad2)

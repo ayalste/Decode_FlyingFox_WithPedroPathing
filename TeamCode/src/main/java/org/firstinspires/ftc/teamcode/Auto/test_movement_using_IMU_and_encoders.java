@@ -75,7 +75,7 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
         driveCM(220, 0.7);
 
         // 2) שמאלה 45°
-        turnLeftSecond(45, 0.35);
+        turnLeftSecond_2(45, 0.35);
 
         // 3) שמאלה 112 (סטראף)
         resetEncoders();
@@ -98,7 +98,7 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
         driveCM(-133, 0.6);
 
         // 7) שמאלה 45°
-        turnLeftSecond(45, 0.35);
+        turnLeftSecond_2(45, 0.35);
 
         // 8) אינטייק פועל ונסיעה 76
         intakeMotor.setPower(-1);
@@ -111,7 +111,7 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
         driveCM(-76, 0.6);
 
         // 10) ימינה 45°
-        turnRightSecond(45, 0.35);
+        turnRightSecond_2(45, 0.35);
 
         // 11) קדימה 133
         resetEncoders();
@@ -132,6 +132,7 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
 
 
     void driveCM(double cm, double drivingSpeed) {
+        resetEncoders();
 
         int ticks = (int)(cm * TICKS_PER_CM);
 
@@ -366,7 +367,62 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
         setRunUsingEncoder();
     }
     //shit test ONLY !!---------------------------------------------------------------->
+    void turnLeftSecond_2(double targetAngle, double turningSpeed){
 
+        if(targetAngle == 0) return;
+
+        imu.resetYaw();          // 🔥 איפוס YAW לפני פנייה
+        sleep(80);
+
+        setRunWithoutEncoder();
+
+        while(opModeIsActive()) {
+
+            double currentYaw = getYaw();
+
+            if(currentYaw >= targetAngle - 0.5)
+                break;
+
+            leftFrontDrive.setPower(-turningSpeed);
+            rightFrontDrive.setPower(turningSpeed);
+            leftBackDrive.setPower(-turningSpeed);
+            rightBackDrive.setPower(turningSpeed);
+
+            telemetry.addData("Yaw", currentYaw);
+            telemetry.update();
+        }
+
+        stopMotors();
+        sleep(120);
+    }
+    void turnRightSecond_2(double targetAngle, double turningSpeed){
+
+        if(targetAngle == 0) return;
+
+        imu.resetYaw();          // 🔥 איפוס YAW לפני פנייה
+        sleep(80);
+
+        setRunWithoutEncoder();
+
+        while(opModeIsActive()) {
+
+            double currentYaw = getYaw();
+
+            if(currentYaw <= -targetAngle + 0.5)
+                break;
+
+            leftFrontDrive.setPower(turningSpeed);
+            rightFrontDrive.setPower(-turningSpeed);
+            leftBackDrive.setPower(turningSpeed);
+            rightBackDrive.setPower(-turningSpeed);
+
+            telemetry.addData("Yaw", currentYaw);
+            telemetry.update();
+        }
+
+        stopMotors();
+        sleep(120);
+    }
 
     void shootCatapult(){
         catapult1.setPower(-1.0);
