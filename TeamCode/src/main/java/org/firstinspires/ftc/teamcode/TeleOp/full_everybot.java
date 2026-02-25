@@ -97,8 +97,9 @@ public class full_everybot extends OpMode {
         //////////////////////////
         //////// Launcher ////////
         //////////////////////////
-        catapult1 = hardwareMap.get(DcMotor.class, "catapult_motor1");
-        catapult2 = hardwareMap.get(DcMotor.class, "catapult_motor2");
+        catapult1 = hardwareMap.get(DcMotor.class, "CR_DWY");
+        catapult2 = hardwareMap.get(DcMotor.class, "CL_DWX");
+
 
         // Catapult directions
         catapult1.setDirection(DcMotor.Direction.REVERSE);
