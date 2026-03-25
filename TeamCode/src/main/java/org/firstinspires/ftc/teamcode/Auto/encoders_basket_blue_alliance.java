@@ -64,41 +64,52 @@ public class encoders_basket_blue_alliance extends LinearOpMode {
 
         shootCatapult();
 
-        driveBackward(143, 0.7);
+        driveBackward(146, 0.5);
 
-        turn(-37,0.4);
+        turn(-37,0.3);
+
 
         intakeMotor.setPower(-1);
-        runIntakeIfDetected();
 
-        driveForward(110, 0.7);
+
+        driveForward(115, 0.5);
+
+        driveBackward(115, 0.5);
+
+        turn(37, 0.3);
         intakeMotor.setPower(0);
 
-        driveBackward(105, 0.7);
-
-        turn(37, 0.4);
-
-
-        driveForward(130, 0.7);
 
 
 
-        intakeMotor.setPower(0);
+
+        driveForward(145, 0.5);
+
+        intakeMotor.setPower(1);
+        sleep(200);
+        intakeMotor.setPower(-1);
+        sleep(200);
 
         shootCatapult();
 
-        driveBackward(220,1);
+        driveBackward(222,1);
 
-        turn(-37,0.4);
+        turn(-37,0.3);
 
         intakeMotor.setPower(-1);
         runIntakeIfDetected();
 
-        driveForward(170,1);
+        driveForward(185,1);
 
-        driveBackward(170, 1);
+        driveBackward(150, 1);
+
+        turn(37,0.3);
+
+        driveForward(185,1);
 
         intakeMotor.setPower(0);
+
+
 
 
 

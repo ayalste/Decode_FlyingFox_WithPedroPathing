@@ -1,148 +1,184 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-@Autonomous(name = "Competition Auto Final", group = "Auto")
+
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+
+@Autonomous(name = "cleannnnnnnnn", group = "Auto")
 public class auto_9_11 extends LinearOpMode {
 
     DcMotor lf, lb, rf, rb;
-    DcMotor X_DeadWheel, Y_DeadWheel;
+    DcMotor catapult1, catapult2;
+    DcMotor intakeMotor;
+
     IMU imu;
 
-    static final double TICKS_PER_CM = 35.6;
-    static final double HEADING_KP = 0.02;
+    static final double TICKS_PER_REV = 537.7;
+    static final double WHEEL_DIAMETER_CM = 9.5;
+
+    static final double TICKS_PER_CM =
+            TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER_CM);
 
     @Override
     public void runOpMode() {
 
-        // Drive motors
         lf = hardwareMap.get(DcMotor.class, "left_front_drive");
         lb = hardwareMap.get(DcMotor.class, "left_back_drive");
         rf = hardwareMap.get(DcMotor.class, "right_front_drive");
         rb = hardwareMap.get(DcMotor.class, "right_back_drive");
 
+        catapult1 = hardwareMap.get(DcMotor.class, "CR_DWY");
+        catapult2 = hardwareMap.get(DcMotor.class, "CL_DWX");
+
+        intakeMotor = hardwareMap.get(DcMotor.class, "intake_Motor");
+
+        imu = hardwareMap.get(IMU.class, "imu");
+
         lf.setDirection(DcMotor.Direction.REVERSE);
         lb.setDirection(DcMotor.Direction.REVERSE);
+        rf.setDirection(DcMotor.Direction.FORWARD);
+        rb.setDirection(DcMotor.Direction.FORWARD);
 
-        // Dead wheels
-        X_DeadWheel = hardwareMap.get(DcMotor.class, "CL_DWX");
-        Y_DeadWheel = hardwareMap.get(DcMotor.class, "CR_DWY");
+        catapult1.setDirection(DcMotor.Direction.REVERSE);
+        catapult2.setDirection(DcMotor.Direction.FORWARD);
 
-        // IMU
-        imu = hardwareMap.get(IMU.class, "imu");
-        imu.initialize(new IMU.Parameters(
-                new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
-                )
-        ));
+        resetEncoders();
 
         waitForStart();
 
+        // 🔥 קטפולט פשוט
+        shootCatapult();
+
+        driveBackward(143, 0.7);
+
+        turn(-45, 0.5);
+
+        driveForward(110, 0.7);
+
+        driveBackward(105, 0.7);
+
+        turn(45, 0.5);
+
+        driveForward(130, 0.7);
+
+        shootCatapult();
+
+        driveBackward(220, 1);
+
+        turn(-45, 0.5);
+
+        driveForward(170, 1);
+
+        driveBackward(170, 1);
+
+        stopMotors();
+    }
+
+    // 🚗 DRIVE
+
+    void driveForward(double cm, double power){
+        int ticks = (int)(cm * TICKS_PER_CM);
+        setTarget(ticks, ticks, ticks, ticks);
+        runToPosition(power);
+    }
+
+    void driveBackward(double cm, double power){
+        driveForward(-cm, power);
+    }
+
+    // 🔄 TURN WITH IMU
+
+    void turn(double targetAngle, double power){
+
         imu.resetYaw();
 
-        driveForwardCM(100, 0.5);
-        strafeLeftCM(100, 0.5);
-        turnLeft(45, 0.4);
-        driveForwardCM(50, 0.5);
+        while(opModeIsActive()){
 
-        stopDrive();
-    }
+            YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+            double yaw = Math.toDegrees(orientation.getYaw());
 
-    // ================= FORWARD WITH HEADING HOLD =================
+            double error = targetAngle - yaw;
 
-    void driveForwardCM(double cm, double power) {
+            if(Math.abs(error) < 1.5){
+                break;
+            }
 
-        resetY();
-        double target = cm * TICKS_PER_CM;
+            double turnPower = power * (error / Math.abs(targetAngle));
 
-        while(opModeIsActive()) {
+            if(Math.abs(turnPower) < 0.1){
+                turnPower = 0.1 * Math.signum(turnPower);
+            }
 
-            double current = Math.abs(Y_DeadWheel.getCurrentPosition());
-            if(current >= Math.abs(target)) break;
-
-            double headingError = -getYaw();
-            double correction = headingError * HEADING_KP;
-
-            lf.setPower(power - correction);
-            lb.setPower(power - correction);
-            rf.setPower(power + correction);
-            rb.setPower(power + correction);
+            lf.setPower(-turnPower);
+            lb.setPower(-turnPower);
+            rf.setPower(turnPower);
+            rb.setPower(turnPower);
         }
 
-        stopDrive();
-        sleep(200);
-    }
-
-    // ================= STRAFE LEFT =================
-
-    void strafeLeftCM(double cm, double power) {
-
-        resetX();
-        double target = cm * TICKS_PER_CM;
-
-        while(opModeIsActive()) {
-
-            double current = Math.abs(X_DeadWheel.getCurrentPosition());
-            if(current >= Math.abs(target)) break;
-
-            lf.setPower(-power);
-            rf.setPower(power);
-            lb.setPower(power);
-            rb.setPower(-power);
-        }
-
-        stopDrive();
-        sleep(200);
-    }
-
-    // ================= TURN LEFT =================
-
-    void turnLeft(double degrees, double power) {
-
-        imu.resetYaw();
+        stopMotors();
         sleep(100);
+    }
 
-        while(opModeIsActive()) {
+    // ⚙️ CORE
 
-            double yaw = getYaw();
-            if(yaw >= degrees - 1) break;
+    void setTarget(int lfTicks, int lbTicks, int rfTicks, int rbTicks){
+        lf.setTargetPosition(lf.getCurrentPosition() + lfTicks);
+        lb.setTargetPosition(lb.getCurrentPosition() + lbTicks);
+        rf.setTargetPosition(rf.getCurrentPosition() + rfTicks);
+        rb.setTargetPosition(rb.getCurrentPosition() + rbTicks);
+    }
 
-            lf.setPower(-power);
-            lb.setPower(-power);
-            rf.setPower(power);
-            rb.setPower(power);
-        }
+    void runToPosition(double power){
 
-        stopDrive();
+        lf.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lb.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rf.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rb.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        lf.setPower(power);
+        lb.setPower(power);
+        rf.setPower(power);
+        rb.setPower(power);
+
+        while(opModeIsActive() && lf.isBusy()){}
+
+        stopMotors();
+        setRunUsingEncoder();
         sleep(200);
     }
 
-    // ================= HELPERS =================
-
-    double getYaw() {
-        return imu.getRobotYawPitchRollAngles()
-                .getYaw(AngleUnit.DEGREES);
-    }
-
-    void stopDrive() {
+    void stopMotors(){
         lf.setPower(0);
         lb.setPower(0);
         rf.setPower(0);
         rb.setPower(0);
     }
 
-    void resetX() {
-        X_DeadWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        X_DeadWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    void resetEncoders(){
+        lf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        setRunUsingEncoder();
     }
 
-    void resetY() {
-        Y_DeadWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Y_DeadWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    void setRunUsingEncoder(){
+        lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    // 🎯 CATAPULT SIMPLE
+
+    void shootCatapult(){
+        catapult1.setPower(-1);
+        catapult2.setPower(-1);
+        sleep(800);
+        catapult1.setPower(0);
+        catapult2.setPower(0);
     }
 }
