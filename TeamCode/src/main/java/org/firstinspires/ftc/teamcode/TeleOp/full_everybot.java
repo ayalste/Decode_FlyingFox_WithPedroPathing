@@ -53,7 +53,7 @@ public class full_everybot extends OpMode {
     private DcMotor foot;
 
     // Encoder
-    static final int MOVE_TICKS = 2320;   // כמה שצריך להסתובב
+    static final int MOVE_TICKS = 2340;   // כמה שצריך להסתובב
     static final double MOVE_POWER = 1;
     boolean lastA = false;
     boolean lastB = false;

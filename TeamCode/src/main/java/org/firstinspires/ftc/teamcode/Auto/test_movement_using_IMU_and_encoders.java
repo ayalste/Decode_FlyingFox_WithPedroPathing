@@ -45,8 +45,8 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
         // Catapult
-        catapult1 = hardwareMap.get(DcMotor.class, "catapult_motor1");
-        catapult2 = hardwareMap.get(DcMotor.class, "catapult_motor2");
+        catapult1 = hardwareMap.get(DcMotor.class, "CR_DWY");
+        catapult2 = hardwareMap.get(DcMotor.class, "CL_DWX");
         catapult1.setDirection(DcMotor.Direction.REVERSE);
         catapult2.setDirection(DcMotor.Direction.FORWARD);
 
@@ -75,7 +75,7 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
         driveCM(220, 0.7);
 
         // 2) שמאלה 45°
-        turnLeftSecond_2(45, 0.35);
+        turnLeftSecond(45, 0.35);
 
         // 3) שמאלה 112 (סטראף)
         resetEncoders();
@@ -98,7 +98,7 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
         driveCM(-133, 0.6);
 
         // 7) שמאלה 45°
-        turnLeftSecond_2(45, 0.35);
+        turnLeftSecond(45, 0.35);
 
         // 8) אינטייק פועל ונסיעה 76
         intakeMotor.setPower(-1);
@@ -111,7 +111,7 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
         driveCM(-76, 0.6);
 
         // 10) ימינה 45°
-        turnRightSecond_2(45, 0.35);
+        turnRightSecond(45, 0.35);
 
         // 11) קדימה 133
         resetEncoders();
@@ -258,49 +258,34 @@ public class test_movement_using_IMU_and_encoders extends LinearOpMode {
 
         if(targetAngle == 0) return;
 
-        setRunWithoutEncoder();
+        imu.resetYaw();
+        sleep(80);
 
-        double startYaw = getYaw();
-        double targetYaw = startYaw + targetAngle;
+        setRunWithoutEncoder();
 
         while(opModeIsActive()) {
 
             double currentYaw = getYaw();
-            double yawDiff = targetYaw - currentYaw;
 
-            if(yawDiff <= 0) break;
+            if(currentYaw >= targetAngle - 1)
+                break;
 
-            double speedMulti = yawDiff / targetAngle;
-
-            // Ограничение коэффициента
-            speedMulti = Math.max(0.0, Math.min(1.0, speedMulti));
-
-            double power = turningSpeed * speedMulti;
-
-            // Минимальная скорость чтобы не залипал
-            if(power < 0.07)
-                power = 0.07;
-
-            leftFrontDrive.setPower(-power);
-            rightFrontDrive.setPower(power);
-            leftBackDrive.setPower(-power);
-            rightBackDrive.setPower(power);
-
-            telemetry.addData("Starting Yaw", startYaw);
-            telemetry.addData("Target Yaw", targetYaw);
-            telemetry.addData("Current Yaw", currentYaw);
-            telemetry.addData("Yaw Diff", yawDiff);
-            telemetry.addData("Speed Multi", speedMulti);
-            telemetry.update();
+            leftFrontDrive.setPower(-turningSpeed);
+            rightFrontDrive.setPower(turningSpeed);
+            leftBackDrive.setPower(-turningSpeed);
+            rightBackDrive.setPower(turningSpeed);
         }
 
         stopMotors();
-        sleep(100);
+        sleep(120);
     }
     //RIGHT TEST WITH ANGLE
     void turnRightSecond(double targetAngle, double turningSpeed){
 
         if(targetAngle == 0) return;
+        imu.resetYaw();
+        sleep(80);
+
 
         setRunWithoutEncoder();
 

@@ -32,8 +32,8 @@ public class auto_wall_red_allience extends LinearOpMode {
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
         // Catapult
-        catapult1 = hardwareMap.get(DcMotor.class, "catapult_motor1");
-        catapult2 = hardwareMap.get(DcMotor.class, "catapult_motor2");
+        catapult1 = hardwareMap.get(DcMotor.class, "CR_DWY");
+        catapult2 = hardwareMap.get(DcMotor.class, "CL_DWX");
 
         catapult1.setDirection(DcMotor.Direction.REVERSE);
         catapult2.setDirection(DcMotor.Direction.FORWARD);

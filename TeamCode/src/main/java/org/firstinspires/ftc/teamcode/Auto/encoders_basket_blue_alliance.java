@@ -3,6 +3,9 @@ package org.firstinspires.ftc.teamcode.Auto;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Autonomous(name = "Encoders Basket Blue", group = "Auto")
 public class encoders_basket_blue_alliance extends LinearOpMode {
@@ -10,6 +13,8 @@ public class encoders_basket_blue_alliance extends LinearOpMode {
     DcMotor lf, lb, rf, rb;
     DcMotor catapult1, catapult2;
     DcMotor intakeMotor;
+    ColorSensor color1, color2;
+    DistanceSensor dist1, dist2;
 
     // YOUR CONSTANTS
     static final double TICKS_PER_REV = 537.7;
@@ -33,6 +38,12 @@ public class encoders_basket_blue_alliance extends LinearOpMode {
 
         intakeMotor = hardwareMap.get(DcMotor.class, "intake_Motor");
 
+        color1 = hardwareMap.get(ColorSensor.class, "right");
+        color2 = hardwareMap.get(ColorSensor.class, "left");
+
+        dist1 = hardwareMap.get(DistanceSensor.class, "right");
+        dist2 = hardwareMap.get(DistanceSensor.class, "left");
+
         lf.setDirection(DcMotor.Direction.REVERSE);
         lb.setDirection(DcMotor.Direction.REVERSE);
         rf.setDirection(DcMotor.Direction.FORWARD);
@@ -53,33 +64,39 @@ public class encoders_basket_blue_alliance extends LinearOpMode {
 
         shootCatapult();
 
-        driveBackward(133, 0.7);
+        driveBackward(143, 0.7);
 
-        turn(-35,0.4);
+        turn(-37,0.4);
 
         intakeMotor.setPower(-1);
+        runIntakeIfDetected();
 
-        driveForward(125, 0.7);
+        driveForward(110, 0.7);
+        intakeMotor.setPower(0);
 
-        driveBackward(115, 0.7);
+        driveBackward(105, 0.7);
 
-        turn(43, 0.4);
+        turn(37, 0.4);
+
 
         driveForward(130, 0.7);
+
+
 
         intakeMotor.setPower(0);
 
         shootCatapult();
 
-        driveBackward(190,1);
+        driveBackward(220,1);
 
-        turn(-45,0.4);
+        turn(-37,0.4);
 
         intakeMotor.setPower(-1);
+        runIntakeIfDetected();
 
-        driveForward(180,1);
+        driveForward(170,1);
 
-        driveBackward(50, 1);
+        driveBackward(170, 1);
 
         intakeMotor.setPower(0);
 
@@ -247,5 +264,45 @@ public class encoders_basket_blue_alliance extends LinearOpMode {
         catapult2.setPower(0.2);
 
     }
+    boolean isGreen(ColorSensor c){
+        return c.green() > c.red() && c.green() > c.blue();
+    }
+
+    boolean isPurple(ColorSensor c){
+        return c.red() > 100 && c.blue() > 100;
+    }
+    boolean isTargetDetected(){
+
+        double d1 = dist1.getDistance(DistanceUnit.CM);
+        double d2 = dist2.getDistance(DistanceUnit.CM);
+
+        boolean close = (d1 < 5 || d2 < 5); // מרחק
+
+        if(!close) return false;
+
+        return isGreen(color1) || isGreen(color2)
+                || isPurple(color1) || isPurple(color2);
+    }
+    void runIntakeIfDetected(){
+
+        if(isTargetDetected()){
+            intakeMotor.setPower(-1);
+
+            sleep(5000);
+
+            intakeMotor.setPower(0);
+        }
+    }
+    void intakeShake(){
+
+        intakeMotor.setPower(1);
+        sleep(1000);
+
+        intakeMotor.setPower(-1);
+        sleep(1000);
+
+        intakeMotor.setPower(0);
+    }
+
 
 }
