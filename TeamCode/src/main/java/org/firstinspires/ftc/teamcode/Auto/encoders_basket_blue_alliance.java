@@ -55,12 +55,14 @@ public class encoders_basket_blue_alliance extends LinearOpMode {
 
         resetEncoders();
 
+
         waitForStart();
+        holdCatapult();
 
         sleep(200);
 
-        catapult1.setPower(0.2);
-        catapult2.setPower(0.2);
+        catapult1.setPower(0.4);
+        catapult2.setPower(0.4);
 
         shootCatapult();
 
@@ -72,9 +74,9 @@ public class encoders_basket_blue_alliance extends LinearOpMode {
         intakeMotor.setPower(-1);
 
 
-        driveForward(115, 0.5);
+        driveForward(125, 0.5);
 
-        driveBackward(115, 0.5);
+        driveBackward(125, 0.5);
 
         turn(37, 0.3);
         intakeMotor.setPower(0);
@@ -83,29 +85,45 @@ public class encoders_basket_blue_alliance extends LinearOpMode {
 
 
 
-        driveForward(145, 0.5);
+        driveForward(150, 0.5);
 
         intakeMotor.setPower(1);
         sleep(200);
         intakeMotor.setPower(-1);
         sleep(200);
 
+        intakeMotor.setPower(0);
+        sleep(750);
         shootCatapult();
 
-        driveBackward(222,1);
+        driveBackward(10, 0.5);
 
-        turn(-37,0.3);
+        turn(20, 0.3);
+
+        driveBackward(150, 1);
+
+        turn(-59,0.3);
 
         intakeMotor.setPower(-1);
         runIntakeIfDetected();
 
-        driveForward(185,1);
+        driveForward(85,1);
 
-        driveBackward(150, 1);
+        driveBackward(85, 1);
 
-        turn(37,0.3);
+        turn(53,0.4);
 
-        driveForward(185,1);
+        driveForward(173,0.6);
+        intakeMotor.setPower(1);
+        sleep(200);
+        intakeMotor.setPower(-1);
+        sleep(200);
+
+        intakeMotor.setPower(0);
+        shootCatapult();
+
+
+
 
         intakeMotor.setPower(0);
 
@@ -264,16 +282,23 @@ public class encoders_basket_blue_alliance extends LinearOpMode {
     }
 
     void shootCatapult(){
-        sleep(1000);
-        catapult1.setPower(-1.0);
-        catapult2.setPower(-1.0);
+
+        // ירי
+        catapult1.setPower(-1);
+        catapult2.setPower(-1);
         sleep(700);
+
+        // החזרה למטה
         catapult1.setPower(1);
         catapult2.setPower(1);
-        sleep(300);
-        catapult1.setPower(0.2);
-        catapult2.setPower(0.2);
+        sleep(400);
 
+        // 🔥 חוזר להחזקה קבועה
+        holdCatapult();
+    }
+    void holdCatapult(){
+        catapult1.setPower(0.4);
+        catapult2.setPower(0.4);
     }
     boolean isGreen(ColorSensor c){
         return c.green() > c.red() && c.green() > c.blue();
