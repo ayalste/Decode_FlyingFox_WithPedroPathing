@@ -63,63 +63,70 @@ public class encoders_basket_blue_alliance extends LinearOpMode {
 
         catapult1.setPower(0.4);
         catapult2.setPower(0.4);
-
+//ירייה ראשונה
         shootCatapult();
-
+        //הולך אחורה
         driveBackward(146, 0.5);
-
+        //עשה סיבוב של כ 45 מעלטת שמאלה
         turn(-37,0.3);
 
-
+//הפעלת אינטייק
         intakeMotor.setPower(-1);
-
-
-        driveForward(125, 0.5);
-
+        //ניסעה קדימה לצורך איסוף כדורים
+        driveForward(135, 0.5);
+//נסיעה אחורה חזרה
         driveBackward(125, 0.5);
-
+//סיבוב כ45 מעלטת ימינה
         turn(37, 0.3);
+        //עצירת אינטייק
         intakeMotor.setPower(0);
 
 
 
 
-
+//נסיעה קדימה עד לסל לצורך קליעה
         driveForward(150, 0.5);
-
+//סידור כדורים
         intakeMotor.setPower(1);
         sleep(200);
         intakeMotor.setPower(-1);
         sleep(200);
-
+//עצירת אינטייק
         intakeMotor.setPower(0);
-        sleep(750);
+        //סליפ לפני זריקה ראשונה
+        sleep(1200);
+        //זריקת כדורים
         shootCatapult();
 
+//נסיעה אחרוה לצורך איסוף עוד 3 כדורים
         driveBackward(10, 0.5);
-
+//סיבוב כ20 מעלות ימינה
         turn(20, 0.3);
-
-        driveBackward(150, 1);
-
-        turn(-59,0.3);
-
+//נסיעה אחרוה של כ150 סמ
+        driveBackward(155, 1);
+//סיבוב שמאלה כ 60 מעלות
+        turn(-50,0.3);
+//הפעלת אינטייק
         intakeMotor.setPower(-1);
-        runIntakeIfDetected();
 
-        driveForward(85,1);
-
-        driveBackward(85, 1);
-
-        turn(53,0.4);
-
-        driveForward(173,0.6);
+//נסיעה קדימה כ 85 סמ
+        driveForward(94,0.5);
+//חזרה מאיסוף של כדורים אחרוה
+        driveBackward(99, 1);
+//סיבוב של כ 53 מעלות ימינה
+        turn(50,0.4);
+//נסיעה קדימה 173 סמ קדימה
+        driveForward(170,0.9);
+        //סידור כדורים
         intakeMotor.setPower(1);
         sleep(200);
         intakeMotor.setPower(-1);
         sleep(200);
-
+//כיבוי אינטייק
         intakeMotor.setPower(0);
+        // שינה לפני זריקה
+        sleep(1200);
+        //ירייה של כדורים
         shootCatapult();
 
 

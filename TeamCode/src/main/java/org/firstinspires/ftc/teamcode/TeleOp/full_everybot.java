@@ -159,9 +159,9 @@ public class full_everybot extends OpMode {
         // =========================
         //      FOOT (gamepad1)
         // =========================
-        boolean currentA = gamepad1.a;
+        boolean currentY = gamepad1.y;
         boolean currentB = gamepad1.b;
-        boolean aPressed = currentA && !lastA;
+        boolean yPressed = currentY && !lastA;
         boolean bPressed = currentB && !lastB;
 
         // HOMING LOGIC
@@ -192,7 +192,7 @@ public class full_everybot extends OpMode {
         }
         else
         {
-            if (aPressed && !foot.isBusy() && !isActive) {
+            if (yPressed && !foot.isBusy() && !isActive) {
 
                 int newTarget = foot.getCurrentPosition() - MOVE_TICKS;
 
@@ -217,7 +217,7 @@ public class full_everybot extends OpMode {
             telemetry.addData("Position", foot.getCurrentPosition());
             telemetry.update();
 
-            lastA = currentA;
+            lastA = currentY;
             lastB = currentB;
         }
 
