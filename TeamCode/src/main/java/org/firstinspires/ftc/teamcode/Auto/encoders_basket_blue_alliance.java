@@ -63,6 +63,7 @@ public class encoders_basket_blue_alliance extends LinearOpMode {
 
         catapult1.setPower(0.4);
         catapult2.setPower(0.4);
+
 //ירייה ראשונה
         shootCatapult();
         //הולך אחורה
@@ -114,7 +115,7 @@ public class encoders_basket_blue_alliance extends LinearOpMode {
 //חזרה מאיסוף של כדורים אחרוה
         driveBackward(99, 1);
 //סיבוב של כ 53 מעלות ימינה
-        turn(50,0.4);
+        turn(55,0.4);
 //נסיעה קדימה 173 סמ קדימה
         driveForward(170,0.9);
         //סידור כדורים
